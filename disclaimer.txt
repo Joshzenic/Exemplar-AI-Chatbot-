@@ -1,0 +1,11 @@
+!DISCLAIMER!
+
+Exemplar AI chatbot is a very rudimentary AI.
+
+It's just a smarter version of ELIZA, so expect dumb responses sometimes. Exemplar can hold short conversations, and can learn words over time.
+
+Exemplar does not understand context or grammar properly, it mainly generates responses with synonyms. Because of this, responses may be nonsensical, poetic, accidentally profound, or seem smarter than it actually is.
+
+This means you shouldn't form a relationship with Exemplar, as it doesn't actually know, know you.
+
+Have fun!
