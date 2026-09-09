@@ -30,27 +30,36 @@ synonyms = {
     "action": {"going where?", "went where?", "have fun!", "alright go ahead!"},
     "misc.": {},
     }
-def load_data():
-    global keywords, synonyms, fallbacks, unknown_words, conjunctions, fillers
-    with open("words.json", "r") as f:
-        data = json.load(f)
-
-    keywords = {k: set(v) for k, v in data["keywords"].items()}
-    synonyms = {k: set(v) for k, v in data["synonyms"].items()}
-    fallbacks = data["fallbacks"]
-
-if os.path.exists("words.json"):
-    load_data()
-    
 
 fallbacks = ["what?", "what are you talking about", "not sure what you mean by that", "i might just be stupid but i dont know what you said"]
 
 response_pts = []
 unknown_words = []
 
+LOG_FOLDER = "log"
+if not os.path.exists(LOG_FOLDER):
+    os.makedirs(LOG_FOLDER)
+
+session_time = time.strftime("%Y%m%d-%H%M%S")
+log_filename = f"{LOG_FOLDER}/chat_{session_time}.txt"
+
+
+def load_data():
+    global keywords, synonyms, fallbacks, unknown_words, conjunctions, fillers
+    with open(f"{LOG_FOLDER}/words.json", "r") as f:
+        data = json.load(f)
+
+    keywords = {k: set(v) for k, v in data["keywords"].items()}
+    synonyms = {k: set(v) for k, v in data["synonyms"].items()}
+    fallbacks = data["fallbacks"]
+
+if os.path.exists(f"{LOG_FOLDER}/words.json"):
+    load_data()
+
 def get_response(ipt):
     words = ipt.replace(".", "").replace("?", "").replace("!", "").replace("!", "").split()
     matched = False
+    det_intent = None
     
     for i in words:
         matched = False
@@ -58,6 +67,7 @@ def get_response(ipt):
             if i in i_set:
                 syn_list = list(synonyms.get(intent, {i}))
                 response_pts.append(random.choice(syn_list))
+                det_intent = intent
                 matched = True
                 break
         if not matched:
@@ -77,12 +87,12 @@ def get_response(ipt):
         response = random.choice(fallbacks)
         
     internal = [
-        {"current intent": intent},
-        {"notes": f"{response} {intent}"},
+        {"current intent": det_intent},
+        {"notes": f"{response} {det_intent}"},
         {"new words": unknown_words},
     ]
 
-    with open("status.json", "w") as f:
+    with open(f"{LOG_FOLDER}/status.json", "w") as f:
         json.dump(internal, f, indent=4)
     
     return response
@@ -91,10 +101,17 @@ while True:
     response_pts = []
     query = input("Ask anything (or enter 'q' to quit): ").strip().lower()
     if query == "q":
+        with open(log_filename, "a") as log_file:
+            log_file.write(f"\n--- Session ended by user at {time.strftime('%H:%M:%S')} ---\n")
+            
         if "misc." not in synonyms:
             synonyms["misc."] = set()
+        elif not isinstance(synonyms["misc."], set):
+            synonyms["misc."] = set(synonyms["misc."])
         if "misc." not in keywords:
             keywords["misc."] = set()
+        elif not isinstance(keywords["misc."], set):
+            keywords["misc."] = set(keywords["misc."])
 
         synonyms["misc."].update(unknown_words)
         keywords["misc."].update(unknown_words)
@@ -104,8 +121,14 @@ while True:
             "fallbacks": fallbacks,
         }
 
-        with open("words.json", "w") as f:
+        with open(f"{LOG_FOLDER}/words.json", "w") as f:
             json.dump(save_data, f, indent=4)
         quit()
     else:
-        print(get_response(query))
+        print("")
+        bot_response = get_response(query)
+        print(f"Exemplar: {bot_response}")
+        print("")
+        with open(log_filename, "a") as log_file:
+            log_file.write(f"[{time.strftime('%H:%M:%S')}] User: {query}\n")
+            log_file.write(f"[{time.strftime('%H:%M:%S')}] Exemplar: {bot_response}\n\n")
