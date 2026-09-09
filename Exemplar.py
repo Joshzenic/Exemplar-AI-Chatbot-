@@ -93,8 +93,12 @@ while True:
     if query == "q":
         if "misc." not in synonyms:
             synonyms["misc."] = set()
+        elif not isinstance(synonyms["misc."], set):
+            synonyms["misc."] = set(synonyms["misc."])
         if "misc." not in keywords:
             keywords["misc."] = set()
+        elif not isinstance(keywords["misc."], set):
+            keywords["misc."] = set(keywords["misc."])
 
         synonyms["misc."].update(unknown_words)
         keywords["misc."].update(unknown_words)
