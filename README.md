@@ -7,3 +7,5 @@ Basically it's a synonym replacer and it does cool stuff with words it learns. c
 It has NO FILTER meaning you can technically teach it to curse. you probably shouldn't do that though. oh and if you want to make it quote stuff you need to put your quotes like " this " so it has seperate tokens for them.
 
 byeee
+
+https://youtu.be/ByGYeomEJro a link to short showcase
